@@ -13,7 +13,6 @@ A hands-on collection of code examples and notes for learning Django REST Framew
 -  Routers
 -  Authentication (Basic and Token-based)
 -  Permissions
--  More to come: Pagination, Filtering, Throttling, Nested Serializers, etc.
 
 ---
 
