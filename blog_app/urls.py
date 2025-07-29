@@ -13,7 +13,7 @@
 
 
 from django.urls import path
-from .views.main_view import BlogView, category_view, category_update, product_view, product_update
+from .views.main_view import BlogView, category_view, category_update, categories_with_products, product_view, product_update, get_products_by_category
 from .views.auth_view import register_user, login_user
 
 urlpatterns = [
@@ -25,6 +25,8 @@ urlpatterns = [
     path('category/<int:id>', category_update),
     path('tokenRefresh', BlogView.as_view()),  
     path('product', product_view),  
-    path('product/<int:id>', product_update),  
+    path('product/<int:id>', product_update), 
+    path('category_id/<int:id>', get_products_by_category),
+    path('categories/', categories_with_products),
 
 ]

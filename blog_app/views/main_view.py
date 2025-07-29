@@ -73,7 +73,7 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 from blog_app.models import Blog, Category, Product
-from blog_app.serializers import BlogSerializer, CategorySerializer, ProductSerializer
+from blog_app.serializers import BlogSerializer, CategorySerializer, CategoryWithProductsSerializer, ProductSerializer
 
 
 class BlogView(APIView):
@@ -225,7 +225,21 @@ def product_update(request, id):
         serializer = ProductSerializer(product_detail)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
     
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+def get_products_by_category(request,id):
+    if request.method == 'GET':
+        products = Product.objects.filter(category=id)
+        if not products.exists():
+            return Response({'msg':"No products available in this category"},status=status.HTTP_404_NOT_FOUND)
+        serializer = ProductSerializer(products, many=True)
+        return Response({'data':serializer.data}, status=status.HTTP_200_OK)
+    else:
+        return Response({'msg':"Failed to fetch products by category"},status=status.HTTP_404_NOT_FOUND)
 
-
-
+@api_view(['GET'])
+def categories_with_products(request):
+    categories = Category.objects.all()
+    serializer = CategoryWithProductsSerializer(categories, many=True)
+    return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 

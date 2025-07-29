@@ -23,3 +23,11 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ['id', 'title','price', 'description', 'category', 'user', 'created_at', 'updated_at', 'category_title']
         read_only_fields = ['id', 'user', 'created_at', 'category_title']        
+
+class CategoryWithProductsSerializer(serializers.ModelSerializer):
+    products = ProductSerializer(many=True, read_only=True, source='product_set')
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'products']        
+
+        
