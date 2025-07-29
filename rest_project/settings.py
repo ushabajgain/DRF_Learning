@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 
 import pymysql # pip install pymysql
 pymysql.install_as_MySQLdb()
@@ -55,6 +56,11 @@ REST_FRAMEWORK = {
     ),
 }
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1), 
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=4),  
+}    
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -93,10 +99,13 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'rest_api_practice_db',
-        'HOST': 'localhost',
         'USER': 'root',
         'PASSWORD': '',
-        'PORT': '3306'
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+        },
     }
 }
 

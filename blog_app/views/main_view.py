@@ -63,6 +63,7 @@
 # from blog_app.serializers import CategorySerializer
 
 # blog_app/views/auth_view.py
+from urllib import request
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -71,8 +72,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
-from blog_app.models import Blog, Category
-from blog_app.serializers import BlogSerializer, CategorySerializer
+from blog_app.models import Blog, Category, Product
+from blog_app.serializers import BlogSerializer, CategorySerializer, ProductSerializer
 
 
 class BlogView(APIView):
@@ -169,3 +170,62 @@ def category_update(request, id):
     elif request.method == 'GET':
         serializer = CategorySerializer(category)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+
+
+def get_tokens_for_user(user):
+    refresh = RefreshToken.for_user(user)
+    return {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }   
+
+
+@api_view(['GET', 'POST'])
+def product_view(request):
+    if request.method == 'POST':
+        serializer = ProductSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user) # Automatically set the user to the authenticated user
+            return Response({'msg':"Product added successfully",'product':serializer.data})
+        else:
+            return Response({'msg':"Failed to add product",'err':serializer.errors},status=status.HTTP_400_BAD_REQUEST)
+        
+    elif request.method == 'GET':
+        try:
+            product = Product.objects.all()
+            serializer = ProductSerializer(product,many=True)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            return Response({'msg':"Failed to fetch products",'err':e})
+    
+
+
+@api_view(['PUT', 'GET', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def product_update(request, id):    
+    try:
+        product_detail = Product.objects.get(id=id)
+    except Product.DoesNotExist:
+        return Response({'msg': "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'PUT':
+        serializer = ProductSerializer(product_detail, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'msg': "Product updated successfully", 'data': serializer.data}, status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response({'msg': "Failed to update product", 'data': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        product_detail.delete()
+        return Response({'msg': 'Product deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+    elif request.method == 'GET':
+        serializer = ProductSerializer(product_detail)
+        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+    
+
+
+
+
